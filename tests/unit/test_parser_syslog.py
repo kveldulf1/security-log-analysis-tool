@@ -35,6 +35,7 @@ def test_parses_failed_invalid_user() -> None:
     assert ev.timestamp.year == 2025
 
 
+@pytest.mark.smoke
 def test_parses_accepted_password() -> None:
     line = (
         "Jul  3 10:16:00 web-01 sshd[1250]: "

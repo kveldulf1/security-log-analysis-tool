@@ -91,6 +91,7 @@ def test_config_error_becomes_exit_2_no_traceback(
     assert "Traceback" not in captured.out
 
 
+@pytest.mark.smoke
 def test_version_flag(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as exc:
         cli.main(["--version"])

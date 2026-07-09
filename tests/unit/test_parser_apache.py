@@ -16,6 +16,7 @@ def _parse(line: str) -> LogEvent | ParseFailure:
     return PARSER.parse_line("access.log", 1, line)
 
 
+@pytest.mark.smoke
 def test_parses_combined_line() -> None:
     line = (
         "10.0.0.50 - alice [03/Jul/2025:10:15:32 +0000] "

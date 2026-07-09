@@ -44,6 +44,7 @@ def _finding(**overrides: object) -> Finding:
     return Finding(**defaults)
 
 
+@pytest.mark.smoke
 def test_sarif_document_validates_against_schema(sarif_schema: dict) -> None:
     document = to_sarif([_finding()])
 
@@ -56,6 +57,19 @@ def test_sarif_uses_repo_relative_uri() -> None:
     locations = document["runs"][0]["results"][0]["locations"]
     assert locations[0]["physicalLocation"]["artifactLocation"]["uri"] == "sample_logs/access.log"
     assert locations[0]["physicalLocation"]["region"]["startLine"] == 97
+
+
+def test_sarif_absolute_path_under_cwd_becomes_relative() -> None:
+    absolute = str(Path.cwd() / "sample_logs" / "access.log")
+    finding = _finding(evidence=(Evidence(file=absolute, line_no=5, excerpt="clean"),))
+
+    document = to_sarif([finding])
+
+    uri = document["runs"][0]["results"][0]["locations"][0]["physicalLocation"]["artifactLocation"][
+        "uri"
+    ]
+    assert uri == "sample_logs/access.log"
+    assert not Path(uri).is_absolute()
 
 
 def test_sarif_maps_critical_to_error_level(sarif_schema: dict) -> None:

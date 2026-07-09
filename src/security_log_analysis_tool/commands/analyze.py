@@ -80,5 +80,8 @@ def run(args: argparse.Namespace) -> int:
         _EXPORTERS[args.export_format](visible, args.output)
         console.print(f"\nExported {len(visible)} finding(s) to {args.output}")
 
-    has_high_or_above = any(f.severity >= Severity.HIGH for f in result.findings)
+    # Base the exit code on the same filtered set the report/export show, so a
+    # `--min-severity` filter that hides all HIGH+ findings can't fail the
+    # build over a report that shows nothing to investigate.
+    has_high_or_above = any(f.severity >= Severity.HIGH for f in visible)
     return 1 if has_high_or_above else 0

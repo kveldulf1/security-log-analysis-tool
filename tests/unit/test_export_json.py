@@ -6,6 +6,8 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from security_log_analysis_tool.export.json_export import to_json, write_json
 from security_log_analysis_tool.models import Evidence, Finding, Severity
 
@@ -30,6 +32,7 @@ def _finding(**overrides: object) -> Finding:
     return Finding(**defaults)
 
 
+@pytest.mark.smoke
 def test_to_json_round_trips_fields() -> None:
     findings = [_finding()]
 
