@@ -1,0 +1,133 @@
+# Default detection rules for security-log-analysis-tool.
+#
+# Every regex below is anchored and free of nested quantifiers (no (a+)+ shapes)
+# so attacker-controlled log content cannot turn a rule into a ReDoS vector.
+# Regex scalars use single-quoted YAML so backslashes stay literal.
+#
+# Schema: version, defaults.window_seconds, alerts.{min_severity,sinks}, rules[].
+# Each rule: id, type, enabled(=true), severity, source(web|auth|omitted), window_seconds,
+#            plus type-specific knobs (threshold, statuses, patterns, ...).
+
+version: 1
+
+defaults:
+  window_seconds: 120
+
+alerts:
+  min_severity: high
+  sinks: [toast, email]
+
+rules:
+  # --- Brute force ------------------------------------------------------------
+  - id: web-brute-force
+    type: brute-force
+    source: web
+    severity: high
+    window_seconds: 120
+    threshold: 5
+    statuses: [401, 403]
+    match_paths: ['/login', '/admin', '/wp-login.php']
+
+  - id: ssh-brute-force
+    type: brute-force
+    source: auth
+    severity: high
+    window_seconds: 120
+    threshold: 5
+
+  # Brute force followed by a success from the same IP -> CRITICAL.
+  - id: web-brute-force-success
+    type: brute-force-success
+    source: web
+    severity: critical
+    window_seconds: 300
+    threshold: 5
+    statuses: [401, 403]
+    success_statuses: [200, 302]
+
+  - id: ssh-brute-force-success
+    type: brute-force-success
+    source: auth
+    severity: critical
+    window_seconds: 300
+    threshold: 5
+
+  # --- Web application attacks ------------------------------------------------
+  - id: path-traversal
+    type: path-traversal
+    source: web
+    severity: high
+    patterns:
+      - '\.\./'
+      - '\.\.\\'
+      - '%2e%2e'
+      - '%252e'
+
+  - id: sqli-probe
+    type: sqli-probe
+    source: web
+    severity: high
+    patterns:
+      - '(?i)\bunion\s+select\b'
+      - '(?i)\bdrop\s+table\b'
+      - "(?i)\\bor\\s+1\\s*=\\s*1\\b"
+      - '(?i);\s*--'
+      - "(?i)'\\s+or\\s+'1'\\s*=\\s*'1"
+
+  - id: scanner-burst
+    type: scanner-burst
+    source: web
+    severity: medium
+    window_seconds: 120
+    threshold: 6
+    statuses: [403, 404]
+    probe_paths:
+      - '/.env'
+      - '/.git/config'
+      - '/admin'
+      - '/phpmyadmin'
+      - '/wp-admin'
+      - '/config.php'
+      - '/backup.sql'
+
+  - id: rate-limit-abuse
+    type: rate-limit-abuse
+    source: web
+    severity: medium
+    window_seconds: 60
+    threshold: 5
+    statuses: [429]
+
+  # --- Host / SSH -------------------------------------------------------------
+  - id: sudo-sensitive-command
+    type: sudo-sensitive-command
+    source: auth
+    severity: high
+    sensitive_patterns:
+      - '/etc/shadow'
+      - '/etc/sudoers'
+      - '/etc/passwd'
+      - '\.ssh/'
+      - 'id_rsa'
+
+  - id: ssh-invalid-user-enum
+    type: ssh-invalid-user-enum
+    source: auth
+    severity: medium
+    window_seconds: 120
+    threshold: 4
+
+  - id: rapid-success-after-failures
+    type: rapid-success-after-failures
+    source: auth
+    severity: high
+    min_failures: 3
+    max_gap_seconds: 30
+
+  # --- Cross-source correlation ----------------------------------------------
+  - id: multi-vector-correlation
+    type: multi-vector-correlation
+    severity: critical
+    window_seconds: 600
+    min_distinct_rules: 2
+    require_distinct_sources: true

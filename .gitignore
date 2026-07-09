@@ -8,3 +8,24 @@ dist/
 
 # Node (local playwright-cli tooling)
 node_modules/
+
+# Secrets floor — never commit credentials or key material
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa*
+secrets/
+.claude/settings.local.json
+
+# Local runtime artifacts (app logs written at runtime; sample_logs/*.log stay committed)
+allure-results/
+allure-report/
+/app.log
+/app.log.*
+/app.jsonl
+/app.jsonl.*
+users.db

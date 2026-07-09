@@ -1,0 +1,22 @@
+# Keep credentials and key material out of the AI's context window entirely.
+# Mirrors the secrets floor in .gitignore.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa*
+secrets/
+.claude/settings.local.json
+
+# Runtime artifacts and vendored tooling — noise, never source of truth.
+node_modules/
+allure-results/
+allure-report/
+/app.log
+/app.log.*
+/app.jsonl
+/app.jsonl.*
+users.db

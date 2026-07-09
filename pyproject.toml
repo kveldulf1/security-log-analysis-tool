@@ -5,11 +5,25 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "security-log-analysis-tool"
 version = "0.1.0"
-description = "TODO: describe security-log-analysis-tool."
+description = "Parse, detect, and correlate suspicious activity across web and auth logs."
 requires-python = ">=3.11"
+dependencies = [
+    "textual>=1.0,<2",
+    "pyyaml>=6.0.1",
+]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pre-commit>=3.5"]
+dev = [
+    "pytest>=8",
+    "pytest-timeout>=2.3",
+    "pytest-asyncio>=0.24",
+    "behave>=1.2.6",
+    "allure-pytest>=2.13.5",
+    "allure-behave>=2.13.5",
+    "aiosmtpd>=1.4.6",
+    "jsonschema>=4.23",
+    "pre-commit>=3.5",
+]
 
 [project.scripts]
 security-log-analysis-tool = "security_log_analysis_tool.cli:main"
@@ -17,6 +31,16 @@ security-log-analysis-tool = "security_log_analysis_tool.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+security_log_analysis_tool = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+    "smoke: fast subset run on every push",
+    "regression: full behavioural regression coverage",
+    "e2e: end-to-end CLI/TUI subprocess and Pilot tests",
+    "perf: performance and concurrency tests (homework scale)",
+    "owasp: OWASP Top 10 focused security tests",
+]
