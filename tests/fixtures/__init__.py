@@ -10,5 +10,6 @@ from .log_lines import (
     apache_line,
     syslog_line,
 )
+from .rule_config import make_rule_config
 
-__all__ = ["ADVERSARIAL_LINES", "apache_line", "syslog_line"]
+__all__ = ["ADVERSARIAL_LINES", "apache_line", "make_rule_config", "syslog_line"]
