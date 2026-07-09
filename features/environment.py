@@ -29,3 +29,12 @@ def before_scenario(context, scenario) -> None:
     # Per-scenario scratch space; cleared between scenarios.
     context.result = None
     context.parsed = None
+
+
+def after_scenario(context, scenario) -> None:
+    # Guarantee any job queue a scenario spun up is torn down, so a gated worker can
+    # never leak a live thread into the next scenario.
+    queue = getattr(context, "queue", None)
+    if queue is not None:
+        queue.shutdown(timeout=5)
+        context.queue = None

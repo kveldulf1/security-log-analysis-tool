@@ -43,8 +43,14 @@ _RULES: list[tuple[re.Pattern[str], str]] = [
     # The userinfo run is greedy up to the LAST '@' before the host, so passwords
     # that themselves contain ':' or '@' are fully scrubbed, and token-only
     # (colon-less) userinfo is caught too.
+    #
+    # The scheme run is length-bounded ({0,32}, not '*'): a long run of
+    # scheme-valid characters with no following '://' would otherwise make the
+    # engine rescan from every start position — O(n^2) on attacker-controlled log
+    # content (a real ReDoS). Real URL schemes are a handful of characters, so the
+    # bound is invisible to legitimate input and makes this rule strictly linear.
     (
-        re.compile(r"(?P<scheme>[a-zA-Z][a-zA-Z0-9+.-]*://)[^\s/]+@"),
+        re.compile(r"(?P<scheme>[a-zA-Z][a-zA-Z0-9+.-]{0,32}://)[^\s/]+@"),
         r"\g<scheme>" + REDACTED + "@",
     ),
     # Authorization: Bearer <token>  /  Authorization=<token>

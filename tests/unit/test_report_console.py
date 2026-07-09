@@ -31,7 +31,11 @@ def _finding(**overrides: object) -> Finding:
 
 def _render(findings: list[Finding]) -> str:
     buffer = io.StringIO()
-    console = Console(file=buffer, width=200, no_color=True)
+    # highlight=False: Rich's automatic number/bracket highlighter otherwise wraps
+    # digits and parens in style codes (e.g. "1 finding(s)"), which — depending on the
+    # runner's terminal detection — splinters the plain-text substrings these tests
+    # assert on. Disabling it keeps the assertions about content, not presentation.
+    console = Console(file=buffer, width=200, no_color=True, highlight=False)
     render_report(console, findings, event_count=10, failure_count=0)
     return buffer.getvalue()
 
