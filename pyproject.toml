@@ -32,7 +32,7 @@ security-log-analysis-tool = "security_log_analysis_tool.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-security_log_analysis_tool = ["py.typed"]
+security_log_analysis_tool = ["py.typed", "alerts/toast.ps1"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
