@@ -1,0 +1,10 @@
+# Python build / packaging artifacts
+__pycache__/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# Node (local playwright-cli tooling)
+node_modules/
