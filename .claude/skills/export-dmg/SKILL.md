@@ -1,12 +1,12 @@
 ---
-name: export-session
+name: export-dmg
 description: "Produce the correct /export filename for the current Claude Code session and hand the user the exact line to type. Names follow the session spawner's scheme: <slug>-master-plan for the orchestrator/planning session, and <N><s|p>-<slug>-session-<N> for spawned workers (e.g. 1s-logwarden-session-1, 2s-logwarden-session-2, 3p-logwarden-session-3). Use whenever the user wants to export/save/snapshot the session transcript to session-logs with a meaningful name."
 user-invocable: true
 allowed-tools: Bash, Read, Glob
 argument-hint: "[session-id | master | plan-slug] [--interim N | --final]"
 ---
 
-# Export Session
+# Export Session (`/export-dmg`)
 
 ## Purpose
 
@@ -52,11 +52,11 @@ never overwritten (the orchestrated-session protocol's rule).
 
    ```bash
    powershell -NoProfile -ExecutionPolicy Bypass \
-     -File .claude/skills/export-session/resolve-export-name.ps1 \
+     -File .claude/skills/export-dmg/resolve-export-name.ps1 \
      -SessionId <slug>-session-N            # worker
    # or, for the planning session:
    powershell -NoProfile -ExecutionPolicy Bypass \
-     -File .claude/skills/export-session/resolve-export-name.ps1 \
+     -File .claude/skills/export-dmg/resolve-export-name.ps1 \
      -MasterPlan -Slug <slug>
    ```
 
@@ -82,4 +82,4 @@ is no manifest to consult. Ask the user for a short descriptive name, then hand 
 - `resolve-export-name.ps1` — the deterministic name resolver (identity detection + manifest lookup +
   no-overwrite). Windows PowerShell 5.1 compatible.
 - `test-resolve-export-name.ps1` — self-tests (positive + negative). Run:
-  `powershell -NoProfile -ExecutionPolicy Bypass -File .claude/skills/export-session/test-resolve-export-name.ps1`.
+  `powershell -NoProfile -ExecutionPolicy Bypass -File .claude/skills/export-dmg/test-resolve-export-name.ps1`.
