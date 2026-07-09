@@ -74,6 +74,7 @@ def test_loads_valid_rules(tmp_path: Path) -> None:
     assert [r.id for r in cfg.enabled_rules()] == ["web-brute-force", "sudo-sensitive-command"]
 
 
+@pytest.mark.smoke
 def test_real_shipped_rules_file_loads() -> None:
     cfg = load_rules(Path("config/rules.yaml"))
     assert cfg.rules

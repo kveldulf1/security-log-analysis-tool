@@ -8,6 +8,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
 from fixtures import ADVERSARIAL_LINES, apache_line, syslog_line
 
 from security_log_analysis_tool.models import LogEvent, ParseFailure
@@ -27,6 +28,7 @@ def _parse_all(path: Path, parser) -> tuple[list[LogEvent], list[ParseFailure]]:
     return events, failures
 
 
+@pytest.mark.smoke
 def test_sample_logs_have_exactly_one_malformed_line() -> None:
     access_events, access_fail = _parse_all(_ROOT / "sample_logs/access.log", get_parser("apache"))
     auth_events, auth_fail = _parse_all(
@@ -37,6 +39,7 @@ def test_sample_logs_have_exactly_one_malformed_line() -> None:
     assert access_events and auth_events
 
 
+@pytest.mark.smoke
 def test_showcase_scenarios_present() -> None:
     access_events, _ = _parse_all(_ROOT / "sample_logs/access.log", get_parser("apache"))
     auth_events, _ = _parse_all(_ROOT / "sample_logs/auth.log", SyslogAuthParser(reference=_REF))

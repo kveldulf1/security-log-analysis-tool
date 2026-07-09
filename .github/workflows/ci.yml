@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Smoke tests (pytest + behave)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package + dev dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: |
+          python -m ruff check .
+          python -m ruff format --check .
+
+      - name: pytest smoke suite
+        run: python -m pytest -m smoke -q --alluredir=allure-results
+
+      - name: behave smoke suite
+        run: >
+          python -m behave --tags=@smoke
+          -f allure_behave.formatter:AllureFormatter -o allure-results
+          features
+
+      - name: Upload Allure results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+          if-no-files-found: error
+
+  allure-pages:
+    name: Publish Allure report to GitHub Pages
+    needs: test
+    if: github.ref == 'refs/heads/master' && always() && needs.test.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Allure results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+      - name: Generate Allure report
+        uses: simple-elf/allure-report-action@v1.9
+        with:
+          allure_results: allure-results
+          allure_report: allure-report
+          keep_reports: 20
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-report
+
+  sarif:
+    name: SARIF code scanning (sample logs)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: python -m pip install -e .
+
+      - name: Analyze sample logs and export SARIF
+        # Sample logs contain deliberate showcase findings, so exit code 1
+        # ("findings present") is the expected, successful outcome here.
+        run: |
+          security-log-analysis-tool analyze \
+            sample_logs/access.log sample_logs/auth.log \
+            --export sarif --output findings.sarif --no-alerts || true
+
+      - name: Upload SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: findings.sarif
+          category: security-log-analysis-tool

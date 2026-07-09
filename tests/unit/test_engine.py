@@ -28,6 +28,7 @@ def test_exactly_one_malformed_line(result) -> None:
     assert len(result.failures) == 1
 
 
+@pytest.mark.smoke
 def test_web_ssh_showcase_correlation_present(result) -> None:
     correlated = [f for f in result.findings if f.correlated_rule_ids]
     match = next((f for f in correlated if f.ip == "10.0.0.50"), None)
@@ -35,6 +36,7 @@ def test_web_ssh_showcase_correlation_present(result) -> None:
     assert len(match.correlated_rule_ids) >= 2
 
 
+@pytest.mark.smoke
 def test_scan_enum_showcase_correlation_present(result) -> None:
     correlated = [f for f in result.findings if f.correlated_rule_ids]
     match = next((f for f in correlated if f.ip == "203.0.113.5"), None)

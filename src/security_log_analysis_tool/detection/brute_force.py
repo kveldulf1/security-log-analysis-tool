@@ -42,28 +42,34 @@ def _is_auth_success(event: LogEvent) -> bool:
     return _AUTH_SUCCESS_MARKER in (event.message or "")
 
 
+def _is_failure(event: LogEvent, statuses: frozenset[int], match_paths: tuple[str, ...]) -> bool:
+    if event.source == LogSource.WEB:
+        return _is_web_failure(event, statuses, match_paths)
+    return _is_auth_failure(event)
+
+
+def _is_success(event: LogEvent, success_statuses: frozenset[int]) -> bool:
+    if event.source == LogSource.WEB:
+        return _is_web_success(event, success_statuses)
+    return _is_auth_success(event)
+
+
 class BruteForceRule:
     """Flags an IP the moment its failure count in the trailing window hits threshold."""
 
     def __init__(self, config: RuleConfig) -> None:
         self.rule_id = config.id
         self.severity = config.severity
-        self._source = config.source
         self._threshold = int(config.params.get("threshold", _DEFAULT_THRESHOLD))
         self._statuses = frozenset(config.params.get("statuses", _DEFAULT_STATUSES))
         self._match_paths = tuple(config.params.get("match_paths", ()))
         self._counter = SlidingWindowCounter(config.window_seconds)
         self._flagged: set[str] = set()
 
-    def _is_failure(self, event: LogEvent) -> bool:
-        if self._source == LogSource.WEB:
-            return _is_web_failure(event, self._statuses, self._match_paths)
-        return _is_auth_failure(event)
-
     def evaluate(self, events: Sequence[LogEvent]) -> list[Finding]:
         findings: list[Finding] = []
         for event in events:
-            if event.ip is None or not self._is_failure(event):
+            if event.ip is None or not _is_failure(event, self._statuses, self._match_paths):
                 continue
             window = self._counter.add(event.ip, event)
             if len(window) >= self._threshold and event.ip not in self._flagged:
@@ -95,7 +101,6 @@ class BruteForceSuccessRule:
     def __init__(self, config: RuleConfig) -> None:
         self.rule_id = config.id
         self.severity = config.severity
-        self._source = config.source
         self._threshold = int(config.params.get("threshold", _DEFAULT_THRESHOLD))
         self._statuses = frozenset(config.params.get("statuses", _DEFAULT_STATUSES))
         self._success_statuses = frozenset(
@@ -105,25 +110,15 @@ class BruteForceSuccessRule:
         self._counter = SlidingWindowCounter(config.window_seconds)
         self._flagged: set[str] = set()
 
-    def _is_failure(self, event: LogEvent) -> bool:
-        if self._source == LogSource.WEB:
-            return _is_web_failure(event, self._statuses, self._match_paths)
-        return _is_auth_failure(event)
-
-    def _is_success(self, event: LogEvent) -> bool:
-        if self._source == LogSource.WEB:
-            return _is_web_success(event, self._success_statuses)
-        return _is_auth_success(event)
-
     def evaluate(self, events: Sequence[LogEvent]) -> list[Finding]:
         findings: list[Finding] = []
         for event in events:
             if event.ip is None:
                 continue
-            if self._is_failure(event):
+            if _is_failure(event, self._statuses, self._match_paths):
                 self._counter.add(event.ip, event)
                 continue
-            if not self._is_success(event):
+            if not _is_success(event, self._success_statuses):
                 continue
             window = self._counter.window_as_of(event.ip, event.timestamp)
             if len(window) >= self._threshold and event.ip not in self._flagged:

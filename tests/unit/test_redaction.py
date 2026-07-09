@@ -60,6 +60,7 @@ def test_redacts_secrets(raw: str, must_contain: str, must_not_contain: str) -> 
     assert must_not_contain not in out
 
 
+@pytest.mark.smoke
 def test_redacts_private_key_block() -> None:
     raw = (
         "config -----BEGIN RSA PRIVATE KEY-----\n"

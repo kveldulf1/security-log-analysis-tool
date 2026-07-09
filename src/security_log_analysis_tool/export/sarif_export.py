@@ -7,7 +7,9 @@ annotates findings directly on the committed sample log lines.
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any
 
 from .. import __version__
@@ -30,7 +32,18 @@ _LEVEL_BY_SEVERITY = {
 
 def _artifact_uri(file: str) -> str:
     normalized = file.replace("\\", "/")
-    return normalized[2:] if normalized.startswith("./") else normalized
+    if normalized.startswith("./"):
+        normalized = normalized[2:]
+    path = Path(normalized)
+    if path.is_absolute():
+        try:
+            relative = os.path.relpath(path, Path.cwd())
+        except ValueError:
+            # Different drive on Windows -- no relative path exists; keep the
+            # normalized absolute path rather than raising.
+            return normalized
+        return relative.replace("\\", "/")
+    return normalized
 
 
 def _location(evidence: Evidence) -> dict[str, Any]:
