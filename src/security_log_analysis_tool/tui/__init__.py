@@ -1,1 +1,1 @@
-"""Textual TUI application (populated in logwarden-session-5)."""
+"""Textual TUI application: login, main menu, analysis, jobs, findings, logs."""

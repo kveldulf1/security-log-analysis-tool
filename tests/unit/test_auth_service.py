@@ -70,6 +70,31 @@ def test_login_unknown_user_rejected(service: AuthService) -> None:
         service.login("ghost", "Password123!")
 
 
+def test_login_unknown_user_still_performs_password_verification(
+    service: AuthService, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Guards a username-enumeration timing side-channel: rejecting an unknown
+    user must still pay the same scrypt cost as a wrong-password rejection,
+    not return early — otherwise response latency alone reveals which
+    usernames exist even though the error message doesn't."""
+
+    import security_log_analysis_tool.auth.service as service_module
+
+    calls: list[str] = []
+    original_verify = service_module.verify_password
+
+    def spy_verify(password: str, stored_hash: str) -> bool:
+        calls.append(stored_hash)
+        return original_verify(password, stored_hash)
+
+    monkeypatch.setattr(service_module, "verify_password", spy_verify)
+
+    with pytest.raises(AuthenticationError):
+        service.login("ghost", "whatever")
+
+    assert calls == [service_module._DUMMY_PASSWORD_HASH]
+
+
 def test_login_wrong_password_rejected(service: AuthService) -> None:
     service.create_user("alice", "Password123!", Role.ANALYST)
     with pytest.raises(AuthenticationError):

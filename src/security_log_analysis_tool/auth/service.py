@@ -20,6 +20,16 @@ from .store import UserStore, UserStoreError
 MAX_FAILED_ATTEMPTS = 5
 LOCKOUT_DURATION = timedelta(minutes=15)
 
+# A fixed, non-secret scrypt hash (of an arbitrary placeholder string, not a real
+# credential) run through the same cost parameters as a real one. Comparing
+# against this for an unknown username keeps that path's latency in line with a
+# known-user wrong-password attempt, so response timing can't be used to
+# enumerate valid usernames (the error message alone doesn't guard against that).
+_DUMMY_PASSWORD_HASH = (
+    "scrypt$32768$8$1$299246705373cd489798d2e3a077c97c1b7c5a90aebd46db2b202b708e204266"
+    "$961022012f8e2f20f87c42d7387e9a88364f2e3b33fb38ff19ff7dbf7b9988e4"
+)
+
 Clock = Callable[[], datetime]
 
 
@@ -57,7 +67,10 @@ class AuthService:
     def login(self, username: str, password: str) -> Principal:
         user = self._store.get_user(username.strip())
         if user is None:
-            # Same message as a bad password: don't reveal whether the account exists.
+            # Spend the same scrypt cost a real verification would, and raise the
+            # same message as a bad password: don't let either content or timing
+            # reveal whether the account exists.
+            verify_password(password, _DUMMY_PASSWORD_HASH)
             raise AuthenticationError("invalid username or password")
 
         now = self._clock()
