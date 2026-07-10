@@ -245,7 +245,7 @@ def test_shutdown_drains_pending_jobs():
 
 def test_shutdown_respects_timeout_when_worker_wedged():
     # A full queue + a worker that never returns must not make shutdown block past its
-    # timeout (regression: sentinel puts on a full bounded queue used to hang forever).
+    # timeout — shutdown signals via a flag, never a blocking put on the bounded queue.
     worker = _BlockingWorker()
     queue = JobQueue(worker, max_pending=1, workers=1)
     queue.submit(["a.log"], submitted_by="u")  # worker grabs it and blocks

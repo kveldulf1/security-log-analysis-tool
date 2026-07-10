@@ -29,3 +29,4 @@ allure-report/
 /app.jsonl
 /app.jsonl.*
 users.db
+.playwright-cli/

@@ -1,6 +1,6 @@
 """Headless Textual Pilot suite for the TUI.
 
-Covers the session-5 Definition of Done: login (pos/neg), start/stop a job,
+Covers the TUI's full contract: login (pos/neg), start/stop a job,
 findings rendering, the tool-logs level prompt, role-based menu visibility,
 graceful quit, and the "invalid input never exits the app" guarantee that
 every screen must uphold.

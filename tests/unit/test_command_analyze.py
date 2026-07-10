@@ -1,9 +1,9 @@
-"""Tests for the ``analyze`` command's exit-code contract.
+"""Tests for the ``analyze`` command's exit-code and alert-dispatch contracts.
 
-Regression coverage for a bug found via `/code-review`: the exit code must be
-derived from the same severity-filtered finding set as the console report and
-any export, not the unfiltered set — otherwise `--min-severity` can hide every
-finding from the report/export while the process still exits 1.
+The exit code must derive from the same severity-filtered finding set as the
+console report and any export, not the unfiltered set — otherwise
+`--min-severity` can hide every finding from the report/export while the
+process still exits 1. Alerts, by contrast, must see the FULL finding set.
 """
 
 from __future__ import annotations
