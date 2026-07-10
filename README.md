@@ -13,8 +13,16 @@ production-shaped extras: role-scoped auth, a job queue for concurrent analyses,
 a Textual TUI, JSON/CSV/SARIF export, email + desktop-toast alerting, an Allure
 HTML regression report, and GitHub Actions / Jenkins pipelines.
 
+> **Built with Claude Code.** Planned and implemented as a multi-session agentic
+> workflow — 7 scoped sessions, dependency-gated, run in parallel git worktrees.
+> The full plan, the per-session prompts, and the verbatim conversation
+> transcripts are committed in [`session-logs/`](session-logs/) and
+> [`session-logs/plans/`](session-logs/plans/). See
+> [AI-assisted development](#ai-assisted-development) for the details.
+
 ## Contents
 
+- [AI-assisted development](#ai-assisted-development)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Install](#install)
@@ -28,7 +36,6 @@ HTML regression report, and GitHub Actions / Jenkins pipelines.
 - [Performance & scaling](#performance--scaling)
 - [Security notes](#security-notes)
 - [Project layout](#project-layout)
-- [AI-assisted development](#ai-assisted-development)
 
 ## Features
 
@@ -352,3 +359,14 @@ docs/manual-tests.md          # procedures that need a human (SMTP, Jenkins UI, 
 This project was built with Claude Code across a series of scoped sessions;
 the verbatim conversation history for each session is committed under
 [`session-logs/`](session-logs/) as part of the submission.
+
+The planning artifacts are committed alongside them under
+[`session-logs/plans/`](session-logs/plans/) and are ready for review:
+
+- [`security-log-tool-master-plan.md`](session-logs/plans/security-log-tool-master-plan.md)
+  — the full implementation plan: stack rationale, architecture, detection-rule
+  set, the session-breakdown dependency DAG, test strategy, and OWASP mapping.
+- `logwarden-session-1.txt` … `logwarden-session-7.txt` — the exact cold-start
+  prompt each session was launched with (the per-session plans the master plan
+  was carved into, one foundation session, five parallel/sequential build
+  sessions, and a final validation session).
