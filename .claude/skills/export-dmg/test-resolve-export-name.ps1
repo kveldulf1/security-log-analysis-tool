@@ -27,7 +27,7 @@ $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("export-name-test-" + [Syste
 $orchRoot = Join-Path $tmp 'orchestration'
 $slugDir = Join-Path $orchRoot 'logwarden'
 $proj = Join-Path $tmp 'project'
-$logs = Join-Path $proj 'session-logs'
+$logs = Join-Path $proj 'session-logs\logs'
 New-Item -ItemType Directory -Path $slugDir, $logs -Force | Out-Null
 
 $manifest = [pscustomobject]@{
@@ -73,7 +73,7 @@ Check 'no-overwrite -> -3'            '1s-logwarden-session-1-3' (Run @{ Session
 
 # --- Positive: auto-detect via worktree marker ------------------------------------------------------
 $markerProj = Join-Path $tmp 'markerproj'
-New-Item -ItemType Directory -Path (Join-Path $markerProj 'session-logs') -Force | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $markerProj 'session-logs\logs') -Force | Out-Null
 ([pscustomobject]@{ sessionId = 'logwarden-session-3' } | ConvertTo-Json) |
     Set-Content -LiteralPath (Join-Path $markerProj '.claude-spawn-worktree.json') -Encoding Ascii
 $got = (& $script -ProjectPath $markerProj -OrchestrationRoot $orchRoot -Raw) | Select-Object -Last 1
@@ -81,7 +81,7 @@ Check 'auto-detect from marker'       '3p-logwarden-session-3' $got
 
 # --- Positive: default (non-Raw) prints the /export line --------------------------------------------
 $line = (& $script -SessionId 'logwarden-session-3' -ProjectPath $proj -OrchestrationRoot $orchRoot) | Select-Object -First 1
-Check 'non-Raw emits /export line'    '/export session-logs/3p-logwarden-session-3.txt' $line
+Check 'non-Raw emits /export line'    '/export session-logs/logs/3p-logwarden-session-3.txt' $line
 
 # --- Negative: malformed id -------------------------------------------------------------------------
 CheckThrows 'malformed session id' { & $script -SessionId 'not-a-session' -ProjectPath $proj -OrchestrationRoot $orchRoot -Raw }

@@ -71,8 +71,8 @@ function Write-NotResumable {
     Write-Host "[resume] NOT resumable - the transcript was never written to disk." -ForegroundColor Red
     if ($TranscriptPath) { Write-Host ("           expected: {0}" -f $TranscriptPath) -ForegroundColor Red }
     if ($U) { Write-Host ("           uuid    : {0} (no {0}.jsonl anywhere under {1})" -f $U, $ProjectsRoot) -ForegroundColor Red }
-    Write-Host "           If you ran /export, the snapshot in session-logs\ IS the transcript:" -ForegroundColor Yellow
-    if ($Cwd) { Write-Host ("             {0}" -f (Join-Path $Cwd 'session-logs')) -ForegroundColor Yellow }
+    Write-Host "           If you ran /export, the snapshot in session-logs\logs\ IS the transcript:" -ForegroundColor Yellow
+    if ($Cwd) { Write-Host ("             {0}" -f (Join-Path (Join-Path $Cwd 'session-logs') 'logs')) -ForegroundColor Yellow }
     if ($StateDirForHint) { Write-Host ("           Boot trace: {0}" -f (Join-Path (Join-Path $StateDirForHint 'gate') ($Id + '.gate.log'))) -ForegroundColor DarkGray }
 }
 

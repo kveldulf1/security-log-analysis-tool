@@ -96,7 +96,7 @@ try {
     $marker = Join-Path $gateDir ($Id + '.transcript-missing')
     if (-not (Test-Path -LiteralPath $marker)) {
         try { Set-Content -LiteralPath $marker -Value ((Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') + " boot uuid path=" + $tp) -Encoding Ascii } catch {}
-        Send-Toast ('Transcript MISSING: ' + $Id) ('Not on disk: ' + $tp + ' . Open the tab and /export session-logs/<name>.txt NOW.')
+        Send-Toast ('Transcript MISSING: ' + $Id) ('Not on disk: ' + $tp + ' . Open the tab and /export session-logs/logs/<name>.txt NOW.')
     }
 } catch {}
 

@@ -285,7 +285,7 @@ if ($StateDir) {
                 Write-GateLog ("TRANSCRIPT-OK exit uuid=" + $sess.sessionId)
             } else {
                 Write-Host ("[transcript] MISSING - {0} was never written to disk (claude --resume will not work for this session)." -f $sess.transcriptPath) -ForegroundColor Red
-                Write-Host "             If you ran /export to session-logs\, that snapshot IS your transcript; if not, this conversation is lost." -ForegroundColor Red
+                Write-Host "             If you ran /export to session-logs\logs\, that snapshot IS your transcript; if not, this conversation is lost." -ForegroundColor Red
                 Write-GateLog ("TRANSCRIPT-MISSING exit uuid=" + $sess.sessionId)
                 $marker = Join-Path $gateDir ($Id + ".transcript-missing")
                 if (-not (Test-Path -LiteralPath $marker)) {

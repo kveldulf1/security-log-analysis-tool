@@ -241,7 +241,7 @@ log + the code.
 > -SessionId <plan-slug>-session-1 -Status done -CommitSha <sha> -Summary "<one line, no secrets>"`
 > (use `-Status failed` if the session cannot finish); (6) as your very last message, print this exact
 > line for the human to run — you cannot invoke slash built-ins yourself: `USER ACTION — type /export
-> session-logs/<plan-slug>-session-1-final.txt` (interim snapshots: `-v2`, `-v3`, …). If you get stuck
+> session-logs/logs/<plan-slug>-session-1-final.txt` (interim snapshots: `-v2`, `-v3`, …). If you get stuck
 > after 2 failed attempts on the same problem, hit an architecture-risk fork, or are about to abandon a
 > DoD item, consult
 > the `oracle` agent (read-only) first and record the consult in the report. Parallel-safety:

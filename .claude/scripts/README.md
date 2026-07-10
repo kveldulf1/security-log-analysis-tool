@@ -159,7 +159,7 @@ a silent post-crash discovery, in four layers (all in the seeded project's `.cla
   turn; the boot watcher (`verify-session-boot.ps1`, spawned by the tab runner) and the tab runner's
   own post-exit check cover the "hook never fired / session ended without a turn" cases. A miss ->
   `.transcript-missing` (or `.hook-missing`) marker + gate-log line + one desktop toast.
-- **Snapshot** -- the human-readable copy is the user's `/export session-logs\<id>-vN.txt` (and
+- **Snapshot** -- the human-readable copy is the user's `/export session-logs\logs\<id>-vN.txt` (and
   `-final.txt` at wrap-up); the model cannot invoke the `/export` built-in, so every session prints
   the exact command as its last line (baked into the cold-start wrap-up).
 - **Recover** -- `resume-session.ps1 -Id <label> -PlanSlug <slug>` resolves the capture and runs

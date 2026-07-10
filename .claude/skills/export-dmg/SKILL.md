@@ -10,18 +10,18 @@ argument-hint: "[session-id | master | plan-slug] [--interim N | --final]"
 
 ## Purpose
 
-Give the user the right `/export` command to snapshot **this** session's transcript into `session-logs/`
-with a meaningful, spawner-consistent filename.
+Give the user the right `/export` command to snapshot **this** session's transcript into
+`session-logs/logs/` with a meaningful, spawner-consistent filename.
 
 **You cannot run `/export` yourself** — it is a Claude Code REPL built-in with no tool behind it. So the
 deliverable of this skill is: figure out the correct filename, then print the exact
-`USER ACTION - type  /export session-logs/<name>.txt` line for the human to type.
+`USER ACTION - type  /export session-logs/logs/<name>.txt` line for the human to type.
 
 ## Naming convention
 
 Mirrors how `spawn-plan-sessions.ps1` labels sessions:
 
-| Session kind | Filename (in `session-logs/`) | Example |
+| Session kind | Filename (in `session-logs/logs/`) | Example |
 | --- | --- | --- |
 | Orchestrator / planning session (ran `/split-plan-into-sessions`, spawned the workers) | `<slug>-master-plan.txt` | `logwarden-master-plan.txt` |
 | Spawned worker session | `<N><s\|p>-<slug>-session-<N>.txt` | `1s-logwarden-session-1.txt`, `3p-logwarden-session-3.txt` |
@@ -42,7 +42,7 @@ never overwritten (the orchestrated-session protocol's rule).
      plus a slug, or a plan slug).
    - **This session's own cold-start prompt** — a spawned worker was booted with its id baked in
      (look in your context for `complete-session.ps1 ... -SessionId <id>` or an
-     `/export session-logs/<id>-...` hint). If you see it, that is your `-SessionId`.
+     `/export session-logs/logs/<id>-...` hint). If you see it, that is your `-SessionId`.
    - The worktree marker `.claude-spawn-worktree.json` in the repo root (`sessionId` field).
    - The git branch: a parallel worker runs on `sessions/<session-id>`.
    - If this is clearly the **planning/orchestrator** session (you ran `/split-plan-into-sessions`
@@ -63,10 +63,10 @@ never overwritten (the orchestrated-session protocol's rule).
    Add `-Final` for the wrap-up snapshot or `-Interim N` for an interim one. If the manifest is missing
    and you already know the kind, pass `-Type s` or `-Type p` to set the letter explicitly.
 
-3. **Relay the result.** The resolver prints the `/export session-logs/<name>.txt` line. Present it to
-   the user verbatim as the last thing you say:
+3. **Relay the result.** The resolver prints the `/export session-logs/logs/<name>.txt` line. Present it
+   to the user verbatim as the last thing you say:
 
-   > USER ACTION — type  `/export session-logs/<name>.txt`  in this tab to save the transcript snapshot.
+   > USER ACTION — type  `/export session-logs/logs/<name>.txt`  in this tab to save the transcript snapshot.
 
    Do **not** try to invoke `/export` through any tool — there isn't one.
 
@@ -74,7 +74,7 @@ never overwritten (the orchestrated-session protocol's rule).
 
 If this session was not spawned by the orchestrator and has no plan slug (a plain one-off chat), there
 is no manifest to consult. Ask the user for a short descriptive name, then hand them
-`/export session-logs/<their-name>.txt` (kebab-case, no spaces — recall the earlier lesson that
+`/export session-logs/logs/<their-name>.txt` (kebab-case, no spaces — recall the earlier lesson that
 `/export` takes the whole argument literally as the path).
 
 ## Files

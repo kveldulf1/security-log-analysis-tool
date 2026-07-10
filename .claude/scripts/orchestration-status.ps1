@@ -200,7 +200,7 @@ function Show-Plan {
             $p = if ($m.path) { $m.path } else { '?' }
             Write-Host ("    {0}  uuid={1}  path={2}" -f $m.id, $u, $p) -ForegroundColor Red
         }
-        Write-Host "    Open the tab and /export session-logs/<id>-vN.txt now; investigate gate\<id>.gate.log." -ForegroundColor Red
+        Write-Host "    Open the tab and /export session-logs/logs/<id>-vN.txt now; investigate gate\<id>.gate.log." -ForegroundColor Red
     }
 
     if ($anyFailed -or $anyMissing) { return 1 } else { return 0 }

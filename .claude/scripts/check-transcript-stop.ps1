@@ -86,7 +86,7 @@ try {
             }
         }
         if ($NotifyScript -and (Test-Path -LiteralPath $NotifyScript)) {
-            $body = "Not on disk: " + $tp + " . Type /export session-logs/<name>.txt NOW; do not close the tab."
+            $body = "Not on disk: " + $tp + " . Type /export session-logs/logs/<name>.txt NOW; do not close the tab."
             # Pass a single, explicitly-quoted command line: Start-Process -ArgumentList does NOT
             # quote array elements, so space-bearing titles/bodies would otherwise split into
             # separate tokens (and a stray '-' token breaks the child's parameter binding entirely).

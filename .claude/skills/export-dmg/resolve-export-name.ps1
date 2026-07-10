@@ -25,7 +25,7 @@ param(
     [ValidateSet('s', 'p')] [string]$Type, # override the sequential/parallel letter (skips manifest)
     [int]$Interim,                         # interim milestone snapshot -> -vN suffix
     [switch]$Final,                        # wrap-up snapshot -> -final suffix
-    [string]$ProjectPath,                  # repo root (defaults to CWD); session-logs\ lives here
+    [string]$ProjectPath,                  # repo root (defaults to CWD); session-logs\logs\ lives here
     [string]$OrchestrationRoot,            # defaults to ~/.claude/orchestration
     [string]$ManifestPath,                 # explicit manifest.json (overrides OrchestrationRoot lookup)
     [switch]$Raw                           # print only the bare name (no /export line) - for scripting/tests
@@ -124,7 +124,7 @@ if ($Final) { $base = "$base-final" }
 elseif ($Interim) { $base = "{0}-v{1}" -f $base, $Interim }
 
 # --- Never overwrite an existing snapshot ----------------------------------------------------------
-$logDir = Join-Path $ProjectPath 'session-logs'
+$logDir = Join-Path (Join-Path $ProjectPath 'session-logs') 'logs'
 $name = $base
 if (Test-Path -LiteralPath (Join-Path $logDir "$name.txt")) {
     $i = 2
@@ -133,7 +133,7 @@ if (Test-Path -LiteralPath (Join-Path $logDir "$name.txt")) {
 }
 
 # --- Output ----------------------------------------------------------------------------------------
-$relPath = "session-logs/$name.txt"
+$relPath = "session-logs/logs/$name.txt"
 if ($Raw) {
     Write-Output $name
 }

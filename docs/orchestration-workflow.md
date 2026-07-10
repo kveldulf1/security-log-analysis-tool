@@ -279,7 +279,7 @@ whatever the cause, including a genuine future one.
    turn; the boot watcher (`verify-session-boot.ps1`, spawned per tab) and the tab runner's post-exit
    check cover the "hook never fired / no turn completed" cases. A miss → marker + gate-log line + one
    debounced `-Kind failed` toast (see the matrix row above).
-3. **Snapshot** — the human-readable copy is the user-typed `/export session-logs\<id>-vN.txt` (and
+3. **Snapshot** — the human-readable copy is the user-typed `/export session-logs\logs\<id>-vN.txt` (and
    `-final.txt` at wrap-up). The model can't invoke the `/export` built-in, so every session prints the
    exact command as its last line (baked into the cold-start wrap-up).
 4. **Recover** — `resume-session.ps1 -Id <label> -PlanSlug <slug>` turns a captured session back into

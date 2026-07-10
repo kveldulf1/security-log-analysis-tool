@@ -31,7 +31,7 @@ metadata:
 7. **Transcript snapshots are user-typed, and you must prompt for them.** The verbatim transcript is
    exported with Claude Code's native `/export` - a REPL built-in the model CANNOT invoke (there is
    no tool for it). So the export is the human's action, and your job is to hand them the exact
-   command: as your very last message, print `USER ACTION - type  /export session-logs/<session-id>-final.txt`.
+   command: as your very last message, print `USER ACTION - type  /export session-logs/logs/<session-id>-final.txt`.
    Convention: interim snapshots are `<session-id>-vN.txt` (v1, v2, ...) taken at milestones; the
    wrap-up snapshot is `<session-id>-final.txt`; never overwrite an existing name (suffix `-2`). This
    is the belt-and-braces human-readable copy on top of the on-disk `.jsonl`; the transcript-guard
