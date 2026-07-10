@@ -15,9 +15,9 @@ HTML regression report, and GitHub Actions / Jenkins pipelines.
 
 > **Built with Claude Code.** Planned and implemented as a multi-session agentic
 > workflow — 7 scoped sessions, dependency-gated, run in parallel git worktrees.
-> The full plan, the per-session prompts, and the verbatim conversation
-> transcripts are committed in [`session-logs/`](session-logs/) and
-> [`session-logs/plans/`](session-logs/plans/). See
+> The original brief, the plan and per-session prompts, and the verbatim
+> conversation transcripts are committed under [`session-logs/`](session-logs/)
+> (in `prompt/`, `plans/`, and `logs/`). See
 > [AI-assisted development](#ai-assisted-development) for the details.
 
 ## Contents
@@ -356,20 +356,23 @@ docs/manual-tests.md          # procedures that need a human (SMTP, Jenkins UI, 
 
 ## AI-assisted development
 
-This project was built with Claude Code across a series of scoped sessions;
-the verbatim conversation history for each session is committed under
-[`session-logs/`](session-logs/) as part of the submission.
+This project was built with Claude Code across a series of scoped sessions. The
+full record is committed under [`session-logs/`](session-logs/) as part of the
+submission, organized into three folders that trace brief → plan → execution:
 
-The planning artifacts are committed alongside them under
-[`session-logs/plans/`](session-logs/plans/) and are ready for review:
-
-- [`security-log-tool-master-plan.md`](session-logs/plans/security-log-tool-master-plan.md)
-  — the full implementation plan: stack rationale, architecture, detection-rule
-  set, the session-breakdown dependency DAG, test strategy, and OWASP mapping.
-- `logwarden-session-1.txt` … `logwarden-session-7.txt` — the exact cold-start
-  prompt each session was launched with (the per-session plans the master plan
-  was carved into, one foundation session, five parallel/sequential build
-  sessions, and a final validation session).
+- [`session-logs/prompt/`](session-logs/prompt/) — the original assessment brief
+  (`plan-prompt.txt`) the whole project was planned from.
+- [`session-logs/plans/`](session-logs/plans/) — the artifacts it was planned
+  into:
+  [`security-log-tool-master-plan.md`](session-logs/plans/security-log-tool-master-plan.md)
+  (the full implementation plan: stack rationale, architecture, detection-rule
+  set, the session-breakdown dependency DAG, test strategy, and OWASP mapping)
+  plus `logwarden-session-1.txt` … `logwarden-session-7.txt`, the exact cold-start
+  prompt each session was launched with (one foundation session, five
+  parallel/sequential build sessions, and a final validation session).
+- [`session-logs/logs/`](session-logs/logs/) — the verbatim conversation
+  transcript of every session (the planning session plus all seven build and
+  validation sessions).
 
 ### How it was built — a custom orchestration workflow
 

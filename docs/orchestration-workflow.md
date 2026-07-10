@@ -3,9 +3,10 @@
 > **Provenance.** This document is reproduced from the author's personal Claude Code toolkit
 > (`claude-workspace-seeder`). It describes the orchestration workflow used to build
 > *security-log-analysis-tool*: this project's master plan was carved into 7 dependency-gated
-> sessions and run across parallel git worktrees — the plan, per-session prompts, and verbatim
-> transcripts are under [`session-logs/`](../session-logs/) and
-> [`session-logs/plans/`](../session-logs/plans/).
+> sessions and run across parallel git worktrees — the original brief is under
+> [`session-logs/prompt/`](../session-logs/prompt/), the plan and per-session prompts under
+> [`session-logs/plans/`](../session-logs/plans/), and the verbatim transcripts under
+> [`session-logs/logs/`](../session-logs/logs/).
 
 ---
 
