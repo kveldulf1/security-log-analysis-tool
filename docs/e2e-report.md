@@ -101,3 +101,88 @@ previously existed but was never invoked):
 
 Real SMTP send and toast visuals remain manual procedures —
 see `docs/manual-tests.md` §1–2.
+
+## 6. TUI walkthrough (visual evidence)
+
+The Textual TUI is exercised headlessly by the Pilot suite
+(`tests/e2e/test_tui_pilot.py`, counted in the 371 pytest total above), but a
+full-screen interactive app is best shown running. The shots below are a live
+run on Windows PowerShell, following `docs/manual-tests.md` §3, launched with:
+
+```powershell
+# after `pip install -e .` — the console script:
+security-log-analysis-tool tui
+# if that folder isn't on PATH, the PATH-independent equivalent:
+python -c "from security_log_analysis_tool.cli import main; main()" tui
+```
+
+- **Login** — role-scoped auth screen; password masked, `^q` quits:
+
+  ![TUI login screen](screenshots/tui-01-login.png)
+
+- **Main menu (analyst)** — logged in as `oscar.lindqvist (analyst)`; the
+  analyst role sees analysis/findings/logs, no admin-only options:
+
+  ![TUI main menu](screenshots/tui-02-main-menu.png)
+
+- **Jobs** — an analysis of the two sample logs ran to completion: job
+  `16b30865`, status `done`, 2 files, 14 findings; a running/queued job can be
+  selected and cancelled here:
+
+  ![TUI jobs list](screenshots/tui-03-jobs.png)
+
+- **Findings** — severity-colored table across completed jobs: the two
+  `multi-vector-correlation` CRITICALs (10.0.0.50 and 203.0.113.5) plus the
+  brute-force/path-traversal/SQLi/sudo/scanner/rate-limit findings — matching
+  the SARIF alerts in §3:
+
+  ![TUI findings table](screenshots/tui-04-findings.png)
+
+- **Tool logs** — live log view with an in-app level picker
+  (DEBUG…CRITICAL); choosing a level filters the view to that level and above:
+
+  ![TUI tool-logs level picker](screenshots/tui-05-tool-logs.png)
+
+## 7. Test coverage summary & known gaps
+
+Taken together, the sections above are the delivery evidence that the product
+works end to end:
+
+| Layer | Evidence | Where |
+|---|---|---|
+| Unit / smoke / OWASP / perf | 371 pytest tests, exit 0 | §1 |
+| BDD regression | `behave`: 6 features / 30 scenarios / 102 steps | §1 |
+| Lint & format | ruff + pre-commit clean | §1 |
+| Merged Allure report | pytest + behave into one report | §1 |
+| Container | Docker build + analyze runs (exit 0 / exit 1) | §2 |
+| CI + supply chain | GitHub Actions green, SARIF code-scanning, Pages Allure | §3 |
+| Regression gate | Jenkins green run **and** RED-build demo (proves it blocks) | §4 |
+| Alert wiring | `AlertDispatcher` invoked from both `analyze` and the `JobQueue` path | §5 |
+| Interactive TUI | live walkthrough — login, jobs, findings, tool logs | §6 |
+
+**Automated coverage of the alerting path** (no live credentials needed):
+
+- **Email sink** — `tests/unit/test_alerts_email.py` drives a real in-process
+  `aiosmtpd` SMTP server on localhost: message construction, delivery, empty-set
+  no-send, unreachable-host error handling, env-config building, and
+  **secret redaction in the email body** are all asserted.
+- **Toast sink** — `tests/unit/test_alerts_toast.py`; **dispatcher** —
+  `tests/unit/test_alert_dispatcher.py`; **factory** —
+  `tests/unit/test_alerts_factory.py`.
+
+**Known gap — deferred for time (not a defect):** the two *manual, human-only*
+alert procedures were **not executed** in this delivery window because they need
+live external resources and a person at the screen:
+
+- **`docs/manual-tests.md` §1 — real SMTP send to a live mailbox.** Never run:
+  it requires a real provider account + app password (a credential we were never
+  prompted for and intentionally did not enter). The SMTP *logic, redaction, and
+  env wiring* are covered by the automated tests above; what remains unverified
+  is only a real STARTTLS-authenticated delivery to an external inbox.
+- **`docs/manual-tests.md` §2 — desktop toast visual.** Never captured: it needs
+  an interactive Windows desktop session. The toast sink's code path is
+  unit-tested (`test_alerts_toast.py`); only the on-screen visual is unconfirmed.
+
+Both are documented, copy-pasteable procedures ready to run when a real inbox /
+desktop is available — closing them is a matter of executing the checklist, not
+of writing or fixing code.

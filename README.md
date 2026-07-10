@@ -192,6 +192,15 @@ checkout.
 security-log-analysis-tool tui
 ```
 
+If the `pip install -e` console script isn't on your `PATH` (e.g. Python's
+per-user `Scripts` directory isn't on `PATH`), launch it PATH-independently:
+
+```bash
+python -c "from security_log_analysis_tool.cli import main; main()" tui
+```
+
+See a live run in [docs/e2e-report.md §6 — TUI walkthrough](docs/e2e-report.md#6-tui-walkthrough-visual-evidence).
+
 Login (role-scoped: `analyst` / `admin`) → main menu: start an analysis, stop
 a running/queued job, browse findings (severity-colored table), view tool
 logs (prompts for a log level and filters live), logout, or quit (drains the

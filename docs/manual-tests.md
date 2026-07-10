@@ -67,6 +67,12 @@ two demo accounts (`amelia.reyes` / `Password123!` admin,
 
 **Run**: `security-log-analysis-tool tui`
 
+(if that console script isn't on `PATH`, use the PATH-independent equivalent
+`python -c "from security_log_analysis_tool.cli import main; main()" tui`)
+
+A captured run of the steps below lives in
+[e2e-report.md §6 — TUI walkthrough](e2e-report.md#6-tui-walkthrough-visual-evidence).
+
 **Steps and expected results**
 
 | Step | Expected result |
