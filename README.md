@@ -244,6 +244,13 @@ Markers: `smoke` (fast, every push), `regression` (behavioural), `e2e`
 (CLI subprocess / TUI Pilot), `perf` (concurrency/throughput, homework-scale),
 `owasp` (OWASP Top 10 mapped tests). Every bugfix ships with a regression test.
 
+> **Deferred (time-boxed assignment):** the CI/CD evidence in
+> [`docs/e2e-report.md`](docs/e2e-report.md) §3–4 (GitHub Actions, SARIF, Pages,
+> Jenkins) is **manual screenshots**, not an automated browser-UI test suite.
+> Automated Playwright browser tests against the Jenkins and GitHub web
+> interfaces were **not delivered** and remain a **TODO** — see
+> [`docs/e2e-report.md`](docs/e2e-report.md) §7.
+
 **Allure HTML report** (requires a JDK locally — CI never needs one):
 
 ```bash

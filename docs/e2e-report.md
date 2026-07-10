@@ -186,3 +186,18 @@ live external resources and a person at the screen:
 Both are documented, copy-pasteable procedures ready to run when a real inbox /
 desktop is available — closing them is a matter of executing the checklist, not
 of writing or fixing code.
+
+**Known gap — deferred for time (not a defect): automated browser-UI tests for
+the Jenkins and GitHub web interfaces were not built.** The CI/CD evidence in
+§3–§4 (GitHub Actions runs, SARIF code scanning, Pages Allure report, and the
+Jenkins green + RED-build demo) was captured as **manual screenshots**
+(`docs/screenshots/`), not by an automated Playwright suite driving those web
+UIs. The `playwright-cli` tooling is available in the repo, but within the
+assignment's time budget no automated browser tests were authored against the
+Jenkins/GitHub pages.
+
+- **TODO:** add Playwright browser tests that drive the local Jenkins UI and the
+  GitHub Actions / Security / Pages views — assert the expected state (job green,
+  code-scanning alerts present, Allure report served) and capture the
+  screenshots as test artifacts, replacing today's manual capture with a
+  repeatable automated check.
