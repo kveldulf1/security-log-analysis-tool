@@ -14,8 +14,10 @@ import time
 from pathlib import Path
 
 import pytest
+from fixtures import RecordingDispatcher
 from textual.css.query import NoMatches
 
+from security_log_analysis_tool.alerts import AlertDispatcher
 from security_log_analysis_tool.auth.passwords import hash_password
 from security_log_analysis_tool.auth.store import UserStore
 from security_log_analysis_tool.logging_setup import configure_logging, reset_logging
@@ -56,7 +58,12 @@ def users_db(tmp_path: Path) -> Path:
 
 
 def make_app(users_db: Path, log_paths=None) -> SLATApp:
-    return SLATApp(rules_path=_RULES_PATH, db_path=str(users_db), log_paths=log_paths)
+    return SLATApp(
+        rules_path=_RULES_PATH,
+        db_path=str(users_db),
+        log_paths=log_paths,
+        alert_dispatcher=RecordingDispatcher(),
+    )
 
 
 async def _login(pilot, username: str, password: str) -> None:
@@ -462,3 +469,24 @@ async def test_invalid_input_never_exits_any_screen(users_db: Path) -> None:
         await pilot.pause(0.1)
         assert app.is_running
         assert type(app.screen).__name__ == "MainMenuScreen"
+
+
+# --- Default alert-dispatcher construction (production branch) --------------------
+
+
+async def test_default_dispatcher_branch_constructs_and_app_boots(users_db: Path) -> None:
+    """Construct SLATApp WITHOUT injecting a dispatcher — the production path.
+
+    This exercises build_dispatcher(self.config.alerts) against the real
+    rules.yaml and environment at app construction. No job runs, so nothing
+    is dispatched (no toast/email side effects) — the assertion is that the
+    default branch builds a real AlertDispatcher and the app still boots to
+    the login screen.
+    """
+
+    app = SLATApp(rules_path=_RULES_PATH, db_path=str(users_db))
+    assert isinstance(app._alert_dispatcher, AlertDispatcher)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        assert type(app.screen).__name__ == "LoginScreen"
+        assert app.is_running

@@ -22,11 +22,12 @@ Design guarantees, each backed by a test:
 
 from __future__ import annotations
 
+import logging
 import queue
 import threading
 import time
 import uuid
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import replace
 from datetime import UTC, datetime
 from typing import Protocol
@@ -34,6 +35,8 @@ from typing import Protocol
 from ..models import Job, JobStatus
 from ..pipeline.engine import AnalysisEngine, AnalysisResult
 from ..redaction import redact
+
+logger = logging.getLogger(__name__)
 
 _TERMINAL_STATES = frozenset({JobStatus.DONE, JobStatus.FAILED, JobStatus.CANCELLED})
 
@@ -190,12 +193,14 @@ class JobQueue:
         *,
         max_pending: int = 100,
         workers: int = 4,
+        on_done: Callable[[Job], None] | None = None,
     ) -> None:
         if max_pending <= 0:
             raise ValueError("max_pending must be positive")
         if workers <= 0:
             raise ValueError("workers must be positive")
         self._worker = worker
+        self._on_done = on_done
         self._queue: queue.Queue[str] = queue.Queue(maxsize=max_pending)
         self._registry = JobRegistry()
         self._threads: list[threading.Thread] = []
@@ -332,15 +337,24 @@ class JobQueue:
             "findings": len(result.findings),
             "duration_seconds": time.monotonic() - started,
         }
-        self._registry.replace(
-            replace(
-                running,
-                status=JobStatus.DONE,
-                finished_at=datetime.now(UTC),
-                findings=result.findings,
-                stats=stats,
-            )
+        done = replace(
+            running,
+            status=JobStatus.DONE,
+            finished_at=datetime.now(UTC),
+            findings=result.findings,
+            stats=stats,
         )
+        # Completion hook (alert dispatch, notifications) runs BEFORE the DONE
+        # status is published: once a reader sees DONE, its side effects have
+        # already happened, so a caller that quits on DONE cannot strand a
+        # half-sent alert on this daemon thread. The callback is as untrusted
+        # as a job: it must never poison the worker thread.
+        if self._on_done is not None:
+            try:
+                self._on_done(done)
+            except Exception:  # noqa: BLE001 — a callback must never kill a worker.
+                logger.warning("on_done callback failed for job %s", job_id, exc_info=True)
+        self._registry.replace(done)
 
     def __enter__(self) -> JobQueue:
         return self

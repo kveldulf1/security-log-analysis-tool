@@ -10,9 +10,11 @@ unreadable log file, unknown format, bad flag value) — the generic ``ConfigErr
 from __future__ import annotations
 
 import argparse
+import uuid
 
 from rich.console import Console
 
+from ..alerts import build_dispatcher
 from ..config import ConfigError, load_rules
 from ..export.csv_export import write_csv
 from ..export.json_export import write_json
@@ -79,6 +81,16 @@ def run(args: argparse.Namespace) -> int:
             raise ConfigError("--output is required when --export is given")
         _EXPORTERS[args.export_format](visible, args.output)
         console.print(f"\nExported {len(visible)} finding(s) to {args.output}")
+
+    # Alerts see the FULL finding set, not the `--min-severity`-filtered view:
+    # the display filter narrows what this run's report shows, but must never
+    # suppress a security notification the config's alert threshold asks for.
+    if not args.no_alerts and result.findings:
+        dispatcher = build_dispatcher(config.alerts)
+        outcomes = dispatcher.dispatch(tuple(result.findings), job_id=f"cli-{uuid.uuid4().hex[:8]}")
+        if outcomes:
+            sent = sum(1 for outcome in outcomes if outcome.ok)
+            console.print(f"\nAlerts dispatched to {sent}/{len(outcomes)} sink(s)")
 
     # Base the exit code on the same filtered set the report/export show, so a
     # `--min-severity` filter that hides all HIGH+ findings can't fail the

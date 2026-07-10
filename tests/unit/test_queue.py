@@ -281,3 +281,47 @@ def test_submit_after_shutdown_raises():
 def test_invalid_construction_rejected(kwargs):
     with pytest.raises(ValueError):
         JobQueue(_CannedWorker(), **kwargs)
+
+
+# --- Completion hook (alert dispatch seam) ----------------------------------
+
+
+def test_on_done_called_with_completed_job():
+    seen = []
+    queue = JobQueue(_CannedWorker(), workers=1, on_done=seen.append)
+    try:
+        job = queue.submit(["a.log"], submitted_by="u")
+        _wait_for(queue, job.job_id, JobStatus.DONE)
+        deadline = time.monotonic() + 2.0
+        while not seen and time.monotonic() < deadline:
+            time.sleep(0.005)
+    finally:
+        queue.shutdown(timeout=5)
+    assert [j.job_id for j in seen] == [job.job_id]
+    assert seen[0].status is JobStatus.DONE
+
+
+def test_on_done_not_called_for_failed_job():
+    seen = []
+    queue = JobQueue(_RaisingWorker("boom"), workers=1, on_done=seen.append)
+    try:
+        job = queue.submit(["a.log"], submitted_by="u")
+        _wait_for(queue, job.job_id, JobStatus.FAILED)
+    finally:
+        queue.shutdown(timeout=5)
+    assert seen == []
+
+
+def test_raising_on_done_never_poisons_the_pool():
+    def explode(job):
+        raise RuntimeError("callback bug")
+
+    queue = JobQueue(_CannedWorker(), workers=1, on_done=explode)
+    try:
+        first = queue.submit(["a.log"], submitted_by="u")
+        _wait_for(queue, first.job_id, JobStatus.DONE)
+        second = queue.submit(["b.log"], submitted_by="u")
+        done = _wait_for(queue, second.job_id, JobStatus.DONE)
+    finally:
+        queue.shutdown(timeout=5)
+    assert done.status is JobStatus.DONE

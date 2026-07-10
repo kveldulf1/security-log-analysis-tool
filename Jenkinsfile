@@ -16,7 +16,9 @@ pipeline {
     stages {
         stage('Setup') {
             steps {
-                bat 'py -3.12 -m venv .venv'
+                // `py -3` = newest installed Python 3 (README floor: 3.11+),
+                // so the pipeline is not coupled to one exact minor version.
+                bat 'py -3 -m venv .venv'
                 bat '.venv\\Scripts\\python.exe -m pip install -e ".[dev]"'
             }
         }

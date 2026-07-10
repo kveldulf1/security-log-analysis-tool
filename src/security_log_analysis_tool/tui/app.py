@@ -15,10 +15,12 @@ from textual import work
 from textual.app import App
 from textual.binding import Binding
 
+from ..alerts import AlertDispatcher, build_dispatcher
 from ..auth.service import AuthService, Principal
 from ..auth.store import UserStore
 from ..config import AppConfig, load_rules
 from ..logging_setup import LoggingPaths
+from ..models import Job
 from ..pipeline.engine import AnalysisEngine
 from ..pipeline.queue import EngineWorker, JobQueue
 
@@ -74,6 +76,7 @@ class SLATApp(App[None]):
         rules_path: str = _DEFAULT_RULES_PATH,
         db_path: str | None = None,
         log_paths: LoggingPaths | None = None,
+        alert_dispatcher: AlertDispatcher | None = None,
     ) -> None:
         super().__init__()
         self.config: AppConfig = load_rules(rules_path)
@@ -83,10 +86,21 @@ class SLATApp(App[None]):
         self._store = UserStore(db_path)
         self.auth_service = AuthService(self._store)
 
+        # Injectable so tests can observe (or silence) alerting; by default a
+        # completed job's findings fan out to the sinks configured in rules.yaml.
+        self._alert_dispatcher = (
+            build_dispatcher(self.config.alerts) if alert_dispatcher is None else alert_dispatcher
+        )
         engine = AnalysisEngine(self.config)
         self.job_queue: JobQueue = JobQueue(
-            EngineWorker(engine), max_pending=_MAX_PENDING_JOBS, workers=_WORKER_COUNT
+            EngineWorker(engine),
+            max_pending=_MAX_PENDING_JOBS,
+            workers=_WORKER_COUNT,
+            on_done=self._dispatch_job_alerts,
         )
+
+    def _dispatch_job_alerts(self, job: Job) -> None:
+        self._alert_dispatcher.dispatch(tuple(job.findings), job_id=job.job_id)
 
     def on_mount(self) -> None:
         from .screens.login import LoginScreen
