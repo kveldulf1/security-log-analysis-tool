@@ -370,3 +370,23 @@ The planning artifacts are committed alongside them under
   prompt each session was launched with (the per-session plans the master plan
   was carved into, one foundation session, five parallel/sequential build
   sessions, and a final validation session).
+
+### How it was built — a custom orchestration workflow
+
+This project was not built in one long chat. It was developed with a custom Claude Code workflow the
+author built and maintains as a separate toolkit (a *workspace seeder*):
+
+- **Seeder** — `install.ps1` deploys a versioned `~/.claude` toolkit (skills, rules, memories,
+  orchestration scripts) into any project, so every repo starts from the same conventions and
+  secret-hygiene floor.
+- **`/split-plan-into-sessions`** — carves one approved plan into a dependency-gated DAG of focused
+  sessions (a foundation session → parallel/sequential build waves → a mandatory final-validation
+  session), each ending in its own reviewable commit.
+- **Orchestrator + spawned sessions** — one terminal tab per session; gated tabs self-unblock via
+  sentinel files the moment their dependencies signal done (no manual Enter, no polling loops),
+  parallel sessions run in isolated git worktrees so they never share a git index, and a
+  *product-owner console* coordinates the run.
+
+Applied here, the master plan was carved into **7 sessions** run across parallel worktrees with
+sentinel gating; the full write-up, with diagrams, is reproduced at
+[`docs/orchestration-workflow.md`](docs/orchestration-workflow.md).
